@@ -173,6 +173,66 @@ class Producto {
             "errors"  => ["Sin cambios detectados o ID inexistente."]
         ];
     }
+// ─────────────────────────────────────────────
+// ELIMINAR (DELETE)
+// ─────────────────────────────────────────────
+
+/**
+ * Elimina un producto por ID
+ * @return array
+ */
+public function eliminar(): array {
+
+    // Validar ID
+    if ($this->id <= 0) {
+        return [
+            "success" => false,
+            "message" => "ID inválido para eliminar.",
+            "accion"  => "Eliminar",
+            "errors"  => ["El ID del producto no es válido."]
+        ];
+    }
+
+    // Verificar que exista
+    $producto = $this->db->query(
+        "SELECT id FROM productos WHERE id = :id LIMIT 1",
+        [
+            ":id" => $this->id
+        ]
+    );
+
+    if (empty($producto)) {
+        return [
+            "success" => false,
+            "message" => "El producto no existe.",
+            "accion"  => "Eliminar",
+            "errors"  => ["No existe un producto con ID {$this->id}."]
+        ];
+    }
+
+    // Eliminar
+    $filas = $this->db->updateSeguro(
+        "DELETE FROM productos WHERE id = :id",
+        [
+            ":id" => $this->id
+        ]
+    );
+
+    if ($filas > 0) {
+        return [
+            "success" => true,
+            "message" => "Producto eliminado correctamente.",
+            "accion"  => "Eliminar"
+        ];
+    }
+
+    return [
+        "success" => false,
+        "message" => "No se pudo eliminar el producto.",
+        "accion"  => "Eliminar",
+        "errors"  => ["No se eliminó ningún registro."]
+    ];
+}
 
     // ─────────────────────────────────────────────
     // BUSCAR (SELECT)

@@ -3,7 +3,6 @@
  * Captura eventos, construye FormData, llama a registrar.php con fetch
  * y procesa las respuestas mediante SweetAlert2.
  */
-
 document.addEventListener("DOMContentLoaded", () => {
 
   const form        = document.getElementById("formProducto");
@@ -11,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnBuscar   = document.getElementById("btnBuscar");
   const inputId     = document.getElementById("id");
   const editBanner  = document.getElementById("editBanner");
+  const btnEliminar = document.getElementById("btnEliminar");
 
   // ════════════════════════════════════════════════
   // FUNCIÓN: Enviar datos a registrar.php con fetch
@@ -97,6 +97,26 @@ document.addEventListener("DOMContentLoaded", () => {
             mostrarErrores(data);
           }
           break;
+
+          case "Eliminar":
+    if (data.success) {
+        await Swal.fire({
+            icon: "success",
+            title: "¡Eliminado!",
+            text: data.message,
+            background: "#111827",
+            color: "#e2e8f0",
+            confirmButtonColor: "#7c3aed",
+            iconColor: "#4ade80"
+        });
+
+        limpiarFormulario();
+        listarProductos();
+
+    } else {
+        mostrarErrores(data);
+    }
+    break;
 
         default:
           console.warn("Acción no manejada en switch JS:", accion);
@@ -242,9 +262,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
   btnBuscar.addEventListener("click", () => enviarAccion("Buscar"));
 
+  btnEliminar.addEventListener("click", eliminarProducto);
+
   document.getElementById("btnLimpiar").addEventListener("click", limpiarFormulario);
 
   // Cargar tabla al inicio
   listarProductos();
+  async function eliminarProducto() {
+
+    if (!inputId.value) {
+        Swal.fire({
+            icon: "warning",
+            title: "Seleccione un producto",
+            text: "Primero busque un producto para eliminar.",
+            background: "#111827",
+            color: "#e2e8f0",
+            confirmButtonColor: "#7c3aed"
+        });
+        return;
+    }
+
+    const confirmar = await Swal.fire({
+        title: "¿Eliminar producto?",
+        text: "Esta acción no se puede deshacer.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+        background: "#111827",
+        color: "#e2e8f0",
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#6b7280"
+    });
+
+    if (!confirmar.isConfirmed) return;
+
+    enviarAccion("Eliminar");
+}
 
 });

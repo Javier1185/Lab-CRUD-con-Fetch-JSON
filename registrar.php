@@ -36,6 +36,10 @@ switch ($accion) {
         $respuesta = $p->editar();
         break;
 
+    case "Eliminar":
+        $respuesta = $p->eliminar();
+        break;
+
     case "Buscar":
         $respuesta = $p->buscar();
         break;
@@ -58,7 +62,6 @@ switch ($accion) {
         ];
         break;
 }
-
 // ── Salida JSON — única línea de echo en todo el archivo ──
 echo json_encode($respuesta);
 exit;
