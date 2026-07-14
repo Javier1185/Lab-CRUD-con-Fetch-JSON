@@ -24,32 +24,79 @@ class Producto {
     // ─────────────────────────────────────────────
     // VALIDACIÓN
     // ─────────────────────────────────────────────
+    /**
+ * Limpia el texto y evita caracteres peligrosos
+ */
+private function limpiarTexto(string $texto): string
+{
+    $texto = trim($texto);
+    $texto = strip_tags($texto); // Elimina HTML y PHP
+    return $texto;
+}
 
     /**
      * Valida los campos obligatorios del producto
      * @return array  Lista de errores (vacía si todo está bien)
      */
-    public function validar(): array {
-        $errores = [];
+    public function validar(): array
+{
+    $errores = [];
 
-        if (empty(trim($this->codigo))) {
-            $errores[] = "El campo Código es obligatorio.";
-        }
+    // Limpiar datos
+    $this->codigo = $this->limpiarTexto($this->codigo);
+    $this->producto = $this->limpiarTexto($this->producto);
 
-        if (empty(trim($this->producto))) {
-            $errores[] = "El campo Producto es obligatorio.";
-        }
-
-        if (!is_numeric($this->precio) || $this->precio <= 0) {
-            $errores[] = "El Precio debe ser un número mayor a 0.";
-        }
-
-        if (!is_numeric($this->cantidad) || $this->cantidad < 0) {
-            $errores[] = "La Cantidad debe ser un número entero mayor o igual a 0.";
-        }
-
-        return $errores;
+    // Campos obligatorios
+    if ($this->codigo === "") {
+        $errores[] = "El campo Código es obligatorio.";
     }
+
+    if ($this->producto === "") {
+        $errores[] = "El campo Producto es obligatorio.";
+    }
+
+    // Longitud
+    if (strlen($this->codigo) > 20) {
+        $errores[] = "El código no puede superar los 20 caracteres.";
+    }
+
+    if (strlen($this->producto) > 100) {
+        $errores[] = "El nombre del producto no puede superar los 100 caracteres.";
+    }
+
+    // Solo letras, números y guiones
+    if (!preg_match('/^[A-Za-z0-9-]+$/', $this->codigo)) {
+        $errores[] = "El código solo puede contener letras, números y guiones.";
+    }
+
+    // Solo letras, números, espacios y algunos signos
+    if (!preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9 .,-]+$/u', $this->producto)) {
+        $errores[] = "El nombre del producto contiene caracteres no permitidos.";
+    }
+
+    // Detectar caracteres peligrosos
+    $patron = "/(<|>|\"|'|;|`|--|#|\/\*|\*\/|\\\\)/";
+
+    if (preg_match($patron, $this->codigo)) {
+        $errores[] = "Se detectaron caracteres peligrosos en el código.";
+    }
+
+    if (preg_match($patron, $this->producto)) {
+        $errores[] = "Se detectaron caracteres peligrosos en el nombre del producto.";
+    }
+
+    // Precio
+    if (!is_numeric($this->precio) || $this->precio <= 0) {
+        $errores[] = "El precio debe ser mayor que cero.";
+    }
+
+    // Cantidad
+    if (!is_numeric($this->cantidad) || $this->cantidad < 0) {
+        $errores[] = "La cantidad debe ser mayor o igual a cero.";
+    }
+
+    return $errores;
+}
 
     // ─────────────────────────────────────────────
     // GUARDAR (INSERT)
